@@ -14,6 +14,6 @@
  *= require_self
  */
 
-#movies .highlight {
+.highlight {
     background-color: yellow;
 }
