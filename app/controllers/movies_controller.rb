@@ -1,6 +1,7 @@
 class MoviesController < ApplicationController
 
 helper_method :checked_rating?
+helper_method :highlight
 
   def movie_params
     params.require(:movie).permit(:title, :rating, :description, :release_date)
@@ -15,16 +16,33 @@ helper_method :checked_rating?
   def index
     @all_ratings = Movie.uniq.pluck(:rating)
     @checked = @all_ratings
+    
     if params[:ratings]
-      @checked = params[:ratings].keys
-    end 
-    @movies = Movie.where(:rating => @checked).order(params[:sort])
+      session[:ratings] = params[:ratings] 
+    end
+    if params[:sort]
+      session[:sort] = params[:sort]
+    end
+    
+    if session[:ratings]
+      @checked = session[:ratings].keys
+    end
+
+    @movies = Movie.where(:rating => @checked).order(session[:sort])
     
   end
   
   def checked_rating?(rating)
-    return true if params[:ratings].nil? or params[:ratings].include? rating
+    return true if session[:ratings].nil? or session[:ratings].include? rating
   end
+  
+  def highlight(col)
+    if not session[:sort].nil? and session[:sort].to_s == col
+      return "highlight"
+    else 
+      return nil
+    end
+  end 
   
 
   def new
