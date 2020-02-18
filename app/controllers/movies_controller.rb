@@ -1,5 +1,7 @@
 class MoviesController < ApplicationController
 
+helper_method :checked_rating?
+
   def movie_params
     params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
@@ -11,9 +13,19 @@ class MoviesController < ApplicationController
   end
 
   def index
-    #@movies = Movie.all
-    @movies = Movie.order(params[:sort])
+    @all_ratings = Movie.uniq.pluck(:rating)
+    @checked = @all_ratings
+    if params[:ratings]
+      @checked = params[:ratings].keys
+    end 
+    @movies = Movie.where(:rating => @checked).order(params[:sort])
+    
   end
+  
+  def checked_rating?(rating)
+    return true if params[:ratings].nil? or params[:ratings].include? rating
+  end
+  
 
   def new
     # default: render 'new' template
